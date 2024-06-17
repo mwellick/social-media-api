@@ -47,7 +47,7 @@ class Like(models.Model):
     liked_post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name="likes"
+        related_name="post_likes"
     )
 
     def __str__(self):
