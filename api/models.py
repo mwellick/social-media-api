@@ -5,9 +5,7 @@ from user.models import User
 
 class Post(models.Model):
     author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="posts"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="posts"
     )
     content = models.TextField()
     published_date = models.DateTimeField(auto_now_add=True)
@@ -19,14 +17,10 @@ class Post(models.Model):
 
 class Comment(models.Model):
     comment_author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="comments"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments"
     )
     post_comment = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name="comments"
+        Post, on_delete=models.CASCADE, related_name="comments"
     )
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,33 +34,22 @@ class Comment(models.Model):
 
 class Like(models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="likes"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes"
     )
-    liked_post = models.ForeignKey(
-        Post,
-        on_delete=models.CASCADE,
-        related_name="post_likes"
-    )
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
 
     def __str__(self):
         return (
-            f"@{self.user.username} liked "
-            f"@{self.liked_post.author.username} post"
+            f"@{self.user.username} liked " f"@{self.liked_post.author.username} post"
         )
 
 
 class Follow(models.Model):
     follower = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="following"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="following"
     )
     following = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="followers"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="followers"
     )
     followed_at = models.DateTimeField(auto_now_add=True)
 
@@ -76,14 +59,10 @@ class Follow(models.Model):
 
 class Unfollow(models.Model):
     unfollower = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="unfollowing"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="unfollowing"
     )
     unfollowed = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="unfollowers"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="unfollowers"
     )
     unfollowed_at = models.DateTimeField(auto_now_add=True)
 
