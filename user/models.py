@@ -50,11 +50,13 @@ class User(AbstractUser):
     online = models.BooleanField(default=False)
     user_followers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name="follow_users"
+        related_name="follow_users",
+        blank=True
     )
     user_following = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
-        related_name="following_users"
+        related_name="following_users",
+        blank=True
     )
 
     USERNAME_FIELD = "email"
