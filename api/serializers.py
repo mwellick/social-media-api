@@ -63,6 +63,14 @@ class LikeSerializer(serializers.ModelSerializer):
         model = Like
         fields = ["id", "user", "post"]
 
+    def validate(self, attrs):
+        Like.unique_like(
+            attrs["user"].username,
+            attrs["post"].content,
+            serializers.ValidationError
+        )
+        return attrs
+
 
 class LikeListSerializer(LikeSerializer):
     user = serializers.CharField(
@@ -97,6 +105,14 @@ class FollowSerializer(serializers.ModelSerializer):
             "followed_at"
         ]
 
+    def validate(self, attrs):
+        Follow.unique_follow(
+            attrs["follower"].username,
+            attrs["following"].username,
+            serializers.ValidationError
+        )
+        return attrs
+
 
 class FollowListSerializer(serializers.ModelSerializer):
     follower = serializers.CharField(
@@ -129,6 +145,14 @@ class UnfollowSerializer(serializers.ModelSerializer):
             "unfollower",
             "unfollowed",
         ]
+
+    def validate(self, attrs):
+        Unfollow.unique_unfollow(
+            attrs["unfollower"].username,
+            attrs["unfollowed"].username,
+            serializers.ValidationError
+        )
+        return attrs
 
 
 class UnfollowListSerializer(serializers.ModelSerializer):
