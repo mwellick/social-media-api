@@ -14,9 +14,11 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class PostListSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source="author.email", read_only=True)
+
     class Meta:
         model = Post
-        fields = ["id", "author", "content", "published_date", "post_media"]
+        fields = ["id", "author", "published_date", "post_media"]
 
 
 class PostRetrieveSerializer(PostListSerializer):
@@ -27,18 +29,33 @@ class PostRetrieveSerializer(PostListSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ["id", "comment_author", "post_comment", "body", "created_at"]
+        fields = ["id", "comment_author", "post", "body", "created_at"]
 
 
 class CommentListSerializer(serializers.ModelSerializer):
+    comment_author = serializers.CharField(
+        source="comment_author.email", read_only=True
+    )
+    post = serializers.CharField(
+        source="post.author.email", read_only=True
+    )
+
     class Meta:
         model = Comment
-        exclude = ["id"]
+        exclude = ["body"]
 
 
-class CommentRetrieveSerializer(CommentListSerializer):
-    class Meta(CommentListSerializer.Meta):
-        pass
+class CommentRetrieveSerializer(serializers.ModelSerializer):
+    comment_author = serializers.CharField(
+        source="comment_author.email", read_only=True
+    )
+    post = serializers.CharField(
+        source="post.author.email", read_only=True
+    )
+
+    class Meta:
+        model = Comment
+        fields = ["id", "comment_author", "post"]
 
 
 class LikeSerializer(serializers.ModelSerializer):
@@ -47,33 +64,61 @@ class LikeSerializer(serializers.ModelSerializer):
         fields = ["id", "user", "post"]
 
 
-class LikeListSerializer(serializers.ModelSerializer):
+class LikeListSerializer(LikeSerializer):
+    user = serializers.CharField(
+        source="user.email", read_only=True
+    )
+    post = serializers.CharField(
+        source="post.author.email", read_only=True
+    )
+
+    class Meta:
+        model = Like
+        fields = [
+            "id",
+            "user",
+            "post"
+        ]
+
+
+class LikeRetrieveSerializer(LikeListSerializer):
     class Meta:
         model = Like
         exclude = ["id"]
 
 
-class LikeRetrieveSerializer(LikeListSerializer):
-    class Meta(LikeListSerializer.Meta):
-        pass
-
-
 class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
-        fields = ["id", "follower", "following", "followed_at"]
+        fields = [
+            "id",
+            "follower",
+            "following",
+            "followed_at"
+        ]
 
 
 class FollowListSerializer(serializers.ModelSerializer):
+    follower = serializers.CharField(
+        source="follower.email", read_only=True
+    )
+    following = serializers.CharField(
+        source="following.email", read_only=True
+    )
+
     class Meta:
         model = Follow
-        exclude = ["id", "followed_at"]
+        fields = [
+            "id",
+            "follower",
+            "following"
+        ]
 
 
-class FollowRetrieveSerializer(serializers.ModelSerializer):
+class FollowRetrieveSerializer(FollowListSerializer):
     class Meta:
         model = Follow
-        fields = ["followed_at"]
+        exclude = ["id"]
 
 
 class UnfollowSerializer(serializers.ModelSerializer):
@@ -87,12 +132,23 @@ class UnfollowSerializer(serializers.ModelSerializer):
 
 
 class UnfollowListSerializer(serializers.ModelSerializer):
+    unfollower = serializers.CharField(
+        source="unfollower.email", read_only=True
+    )
+    unfollowed = serializers.CharField(
+        source="unfollowed.email", read_only=True
+    )
+
     class Meta:
         model = Unfollow
-        exclude = ["id", "unfollowed_at"]
+        fields = [
+            "id",
+            "unfollower",
+            "unfollowed",
+        ]
 
 
-class UnfollowRetrieveSerializer(serializers.ModelSerializer):
+class UnfollowRetrieveSerializer(UnfollowListSerializer):
     class Meta:
         model = Unfollow
-        fields = ["unfollowed_at"]
+        exclude = ["id"]

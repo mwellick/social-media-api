@@ -28,7 +28,7 @@ class Comment(models.Model):
     def __str__(self):
         return (
             f"{self.comment_author} left a comment on a "
-            f"{self.post_comment.author} post"
+            f"{self.post.author} post"
         )
 
 
@@ -40,7 +40,7 @@ class Like(models.Model):
 
     def __str__(self):
         return (
-            f"@{self.user.username} liked " f"@{self.liked_post.author.username} post"
+            f"@{self.user.username} liked " f"@{self.post.author.username} post"
         )
 
 
