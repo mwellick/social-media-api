@@ -1,11 +1,5 @@
 from rest_framework import serializers
-from .models import (
-    Post,
-    Comment,
-    Like,
-    Follow,
-    Unfollow
-)
+from .models import Post, Comment, Like, Follow, Unfollow
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -22,13 +16,7 @@ class PostSerializer(serializers.ModelSerializer):
 class PostListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = [
-            "id",
-            "author",
-            "content",
-            "published_date",
-            "post_media"
-        ]
+        fields = ["id", "author", "content", "published_date", "post_media"]
 
 
 class PostRetrieveSerializer(PostListSerializer):
@@ -39,13 +27,7 @@ class PostRetrieveSerializer(PostListSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = [
-            "id",
-            "comment_author",
-            "post_comment",
-            "body",
-            "created_at"
-        ]
+        fields = ["id", "comment_author", "post_comment", "body", "created_at"]
 
 
 class CommentListSerializer(serializers.ModelSerializer):
@@ -62,11 +44,7 @@ class CommentRetrieveSerializer(CommentListSerializer):
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = [
-            "id",
-            "user",
-            "liked_post"
-        ]
+        fields = ["id", "user", "post"]
 
 
 class LikeListSerializer(serializers.ModelSerializer):
@@ -83,21 +61,13 @@ class LikeRetrieveSerializer(LikeListSerializer):
 class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
-        fields = [
-            "id",
-            "follower",
-            "following",
-            "followed_at"
-        ]
+        fields = ["id", "follower", "following", "followed_at"]
 
 
 class FollowListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
-        exclude = [
-            "id",
-            "followed_at"
-        ]
+        exclude = ["id", "followed_at"]
 
 
 class FollowRetrieveSerializer(serializers.ModelSerializer):
@@ -119,15 +89,10 @@ class UnfollowSerializer(serializers.ModelSerializer):
 class UnfollowListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unfollow
-        exclude = [
-            "id",
-            "unfollowed_at"
-        ]
+        exclude = ["id", "unfollowed_at"]
 
 
 class UnfollowRetrieveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unfollow
-        fields = [
-            "unfollowed_at"
-        ]
+        fields = ["unfollowed_at"]

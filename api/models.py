@@ -19,7 +19,7 @@ class Comment(models.Model):
     comment_author = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="comments"
     )
-    post_comment = models.ForeignKey(
+    post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="comments"
     )
     body = models.TextField()
