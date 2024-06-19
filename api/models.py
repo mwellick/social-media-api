@@ -45,6 +45,7 @@ class Like(models.Model):
         on_delete=models.CASCADE,
         related_name="post_likes"
     )
+    is_liked = models.BooleanField(default=False)
 
     @staticmethod
     def unique_like(user: str, post: str, error_to_raise):
@@ -93,6 +94,7 @@ class Follow(models.Model):
         related_name="followers"
     )
     followed_at = models.DateTimeField(auto_now_add=True)
+    is_followed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.follower.username} followed {self.following.username}"
@@ -124,56 +126,6 @@ class Follow(models.Model):
     ):
         self.full_clean()
         super(Follow, self).save(
-            force_insert,
-            force_update,
-            using,
-            update_fields
-        )
-
-
-class Unfollow(models.Model):
-    unfollower = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="unfollowing"
-    )
-    unfollowed_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="unfollowers"
-    )
-    unfollowed_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.unfollower.username} unfollowed {self.unfollowed_user.username}"
-
-    @staticmethod
-    def unique_unfollow(unfollower: str, unfollowed: str, error_to_raise):
-        if unfollower == unfollowed:
-            raise error_to_raise("This action cannot be realized")
-        if Unfollow.objects.filter(
-            unfollower__username=unfollower,
-            unfollowed_user__username=unfollowed
-        ).exists():
-            raise error_to_raise("You have already unfollowed this user.")
-        return {"unfollower": unfollower, "unfollowed": unfollowed}
-
-    def clean(self):
-        Unfollow.unique_unfollow(
-            self.unfollower.username,
-            self.unfollowed_user.username,
-            ValueError
-        )
-
-    def save(
-        self,
-        force_insert=False,
-        force_update=False,
-        using=None,
-        update_fields=None
-    ):
-        self.full_clean()
-        super(Unfollow, self).save(
             force_insert,
             force_update,
             using,
