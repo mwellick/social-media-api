@@ -1,6 +1,15 @@
+from django.contrib.auth import get_user_model
+from rest_framework import status, generics, mixins
+from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from .models import Post, Comment, Like, Follow, Unfollow
+from user.models import User
+from .models import Post, Comment, Like, Follow
+from .permissions import IsAdminAllORIsAuthenticatedOrReadOnly
 
 from .serializers import (
     PostSerializer,
@@ -9,15 +18,13 @@ from .serializers import (
     CommentSerializer,
     CommentListSerializer,
     CommentRetrieveSerializer,
+    CreateCommentSerializer,
     LikeSerializer,
     LikeListSerializer,
     LikeRetrieveSerializer,
     FollowSerializer,
     FollowListSerializer,
-    FollowRetrieveSerializer,
-    UnfollowSerializer,
-    UnfollowListSerializer,
-    UnfollowRetrieveSerializer,
+    CreateLikeSerializer,
 )
 
 
@@ -26,21 +33,27 @@ class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
 
     def get_serializer_class(self):
+        if self.action == "like_post":
+            return CreateLikeSerializer
+        if self.action == "add_comment":
+            return CreateCommentSerializer
         if self.action == "list":
             return PostListSerializer
-        elif self.action == "retrieve":
+        if self.action == "retrieve":
             return PostRetrieveSerializer
-        return PostListSerializer
+        return PostSerializer
 
     def get_queryset(self):
         queryset = self.queryset
         username = self.request.query_params.get("username")
+        title = self.request.query_params.get("title")
         year = self.request.query_params.get("year")
         month = self.request.query_params.get("month")
         day = self.request.query_params.get("day")
         if username:
             queryset = queryset.filter(author__username__icontains=username)
-
+        if title:
+            queryset = queryset.filter(title__icontains=title)
         if year:
             queryset = queryset.filter(published_date__year=year)
 
@@ -52,6 +65,39 @@ class PostViewSet(ModelViewSet):
         if self.action in ("list", "retrieve"):
             return queryset.select_related("author")
         return queryset
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="add-comment",
+        permission_classes=[IsAdminAllORIsAuthenticatedOrReadOnly],
+    )
+    def add_comment(self, request, pk=None):
+        post = self.get_object()
+        serializer = CreateCommentSerializer(
+            data=request.data,
+            context={"request": request, "post_id": pk},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(post=post)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="like-post",
+        permission_classes=[IsAdminAllORIsAuthenticatedOrReadOnly],
+    )
+    def like_post(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        serializer = CreateLikeSerializer(
+            data=request.data,
+            context={"request": request, "post_id": pk},
+
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(post=post)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class CommentViewSet(ModelViewSet):
@@ -83,9 +129,7 @@ class CommentViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return CommentListSerializer
-        elif self.action == "retrieve":
-            return CommentRetrieveSerializer
-        return CommentSerializer
+        return CommentRetrieveSerializer
 
 
 class LikeViewSet(ModelViewSet):
@@ -95,9 +139,7 @@ class LikeViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return LikeListSerializer
-        elif self.action == "retrieve":
-            return LikeRetrieveSerializer
-        return LikeSerializer
+        return LikeRetrieveSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -116,8 +158,6 @@ class FollowViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return FollowListSerializer
-        elif self.action == "retrieve":
-            return FollowRetrieveSerializer
         return FollowSerializer
 
     def get_queryset(self):
@@ -133,26 +173,19 @@ class FollowViewSet(ModelViewSet):
         return queryset
 
 
-class UnfollowViewSet(ModelViewSet):
-    queryset = Unfollow.objects.all()
-    serializer_class = UnfollowSerializer
+class FollowUserView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin
+):
+    queryset = Follow.objects.all()
+    serializer_class = FollowSerializer
 
-    def get_serializer_class(self):
-        if self.action == "list":
-            return UnfollowListSerializer
-        elif self.action == "retrieve":
-            return UnfollowRetrieveSerializer
-        return UnfollowSerializer
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
-    def get_queryset(self):
-        queryset = self.queryset
-        unfollower = self.request.query_params.get("unfollower")
-        unfollowed_user = self.request.query_params.get("unfollowed")
 
-        if unfollower:
-            queryset = queryset.filter(unfollower__username__icontains=unfollower)
-        if unfollowed_user:
-            queryset = queryset.filter(unfollowed__username__icontains=unfollowed_user)
-        if self.action in ("list", "retrieve"):
-            return queryset.select_related("unfollower", "unfollowed_user")
-        return queryset
+class UnfollowUserView(generics.GenericAPIView):
+    serializer_class = FollowSerializer
+
+    def post(self, request, *args, **kwargs):
+        ...

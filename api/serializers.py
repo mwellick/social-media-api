@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Post, Comment, Like, Follow, Unfollow
+from rest_framework.relations import PrimaryKeyRelatedField
+
+from .models import Post, Comment, Like, Follow
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -8,8 +10,10 @@ class PostSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "author",
+            "title",
             "content",
             "published_date",
+            "post_media"
         ]
 
 
@@ -18,13 +22,24 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "author", "published_date"]
+        fields = ["id", "title", "author", "published_date"]
 
 
 class PostRetrieveSerializer(PostListSerializer):
     class Meta:
         model = Post
         exclude = ["id"]
+
+
+class CreateCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ["comment_author", "post", "body"]
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        validated_data["comment_author"] = request.user
+        return super().create(validated_data)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -37,9 +52,7 @@ class CommentListSerializer(serializers.ModelSerializer):
     comment_author = serializers.CharField(
         source="comment_author.username", read_only=True
     )
-    commented_post = serializers.CharField(
-        source="post.content", read_only=True
-    )
+    commented_post = serializers.CharField(source="post.content", read_only=True)
 
     class Meta:
         model = Comment
@@ -47,7 +60,9 @@ class CommentListSerializer(serializers.ModelSerializer):
 
 
 class CommentRetrieveSerializer(serializers.ModelSerializer):
-    comment_author = serializers.CharField(source="comment_author.username", read_only=True)
+    comment_author = serializers.CharField(
+        source="comment_author.username", read_only=True
+    )
     commented_post = serializers.CharField(source="post.content", read_only=True)
 
     class Meta:
@@ -55,16 +70,27 @@ class CommentRetrieveSerializer(serializers.ModelSerializer):
         fields = ["comment_author", "body", "created_at", "commented_post"]
 
 
-class LikeSerializer(serializers.ModelSerializer):
+class CreateLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = ["id", "user", "post"]
+        fields = ["user", "post"]
+
+    def create(self, validated_data):
+        request = self.context.get("request")
+        validated_data["user"] = request.user
+        return super().create(validated_data)
 
     def validate(self, attrs):
         Like.unique_like(
             attrs["user"].username, attrs["post"].content, serializers.ValidationError
         )
         return attrs
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ["id", "user", "post"]
 
 
 class LikeListSerializer(LikeSerializer):
@@ -100,7 +126,9 @@ class FollowSerializer(serializers.ModelSerializer):
 
 class FollowListSerializer(serializers.ModelSerializer):
     follower = serializers.CharField(source="follower.username", read_only=True)
-    followed_user = serializers.CharField(source="followed_user.username", read_only=True)
+    followed_user = serializers.CharField(
+        source="followed_user.username", read_only=True
+    )
 
     class Meta:
         model = Follow
@@ -110,41 +138,4 @@ class FollowListSerializer(serializers.ModelSerializer):
 class FollowRetrieveSerializer(FollowListSerializer):
     class Meta:
         model = Follow
-        exclude = ["id"]
-
-
-class UnfollowSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Unfollow
-        fields = [
-            "id",
-            "unfollower",
-            "unfollowed_user",
-        ]
-
-    def validate(self, attrs):
-        Unfollow.unique_unfollow(
-            attrs["unfollower"].username,
-            attrs["unfollowed_user"].username,
-            serializers.ValidationError,
-        )
-        return attrs
-
-
-class UnfollowListSerializer(serializers.ModelSerializer):
-    unfollower = serializers.CharField(source="unfollower.username", read_only=True)
-    unfollowed = serializers.CharField(source="unfollowed_user.username", read_only=True)
-
-    class Meta:
-        model = Unfollow
-        fields = [
-            "id",
-            "unfollower",
-            "unfollowed_user",
-        ]
-
-
-class UnfollowRetrieveSerializer(UnfollowListSerializer):
-    class Meta:
-        model = Unfollow
-        exclude = ["id"]
+        exclude = ["id", "is_followed"]

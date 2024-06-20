@@ -11,5 +11,5 @@ class IsAdminAllORIsAuthenticatedOrReadOnly(BasePermission):
                 and request.user
                 and request.user.is_authenticated
             )
-            or obj.author == request.user
+            or obj.author == request.user or request.user.is_staff
         )
