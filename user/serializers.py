@@ -40,7 +40,24 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "id",
+            "email",
+            "username"
+        ]
+
+
 class UserRetrieveSerializer(serializers.ModelSerializer):
+    followers = serializers.IntegerField(
+        source="user_followers.count", read_only=True
+    )
+    users_followed = serializers.IntegerField(
+        source="user_following.count", read_only=True
+    )
+
     class Meta:
         model = get_user_model()
         fields = [
@@ -48,10 +65,11 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
             "username",
             "online",
             "bio",
-            "user_followers",
-            "user_following",
+            "followers",
+            "users_followed",
             "profile_image"
         ]
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
