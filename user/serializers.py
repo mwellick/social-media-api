@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.utils.translation import gettext as _
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -45,8 +46,34 @@ class UserRetrieveSerializer(serializers.ModelSerializer):
         fields = [
             "email",
             "username",
+            "online",
             "bio",
             "user_followers",
             "user_following",
             "profile_image"
         ]
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+        user.online = True
+        user.save()
+        return data
+
+
+class UserLogoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "email",
+            "password"
+        ]
+        extra_kwargs = {
+            "password": {
+                "write_only": True,
+                "min_length": 5,
+                "style": {"input_type": "password"},
+                "label": _("Password"),
+            }
+        }
