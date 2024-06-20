@@ -5,7 +5,8 @@ from .views import (
     CommentViewSet,
     LikeViewSet,
     FollowViewSet,
-    UnfollowViewSet
+    FollowUserView,
+    UnfollowUserView,
 )
 
 router = routers.DefaultRouter()
@@ -13,8 +14,11 @@ router.register("posts", PostViewSet)
 router.register("comments", CommentViewSet)
 router.register("likes", LikeViewSet)
 router.register("follows", FollowViewSet)
-router.register("unfollows", UnfollowViewSet)
 
-urlpatterns = [path("", include(router.urls))]
+urlpatterns = [
+    path("", include(router.urls)),
+    path("follow-user/", FollowUserView.as_view(), name="follow-user"),
+    path("unfollow-user/", UnfollowUserView.as_view(), name="unfollow-user"),
+]
 
 app_name = "social_media_api"
