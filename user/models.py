@@ -1,6 +1,10 @@
+import pathlib
+import uuid
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.conf import settings
+from django.utils.text import slugify
 from django.utils.translation import gettext as _
 
 
@@ -38,25 +42,26 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
-class User(AbstractUser):
-    username = models.CharField(
-        max_length=63,
-        unique=True,
-        null=True
+def user_profile_image_path(instance: "User", filename: str) -> pathlib.Path:
+    filename = (
+        f"{slugify(instance.username)}-{uuid.uuid4()}" + pathlib.Path(filename).suffix
     )
+    return pathlib.Path("upload/users") / pathlib.Path(filename)
+
+
+class User(AbstractUser):
+    username = models.CharField(max_length=63, unique=True, null=True)
     email = models.EmailField(_("email address"), unique=True)
     bio = models.TextField(null=True, blank=True)
-    profile_image = models.ImageField(blank=True, null=True)
+    profile_image = models.ImageField(
+        blank=True, null=True, upload_to=user_profile_image_path
+    )
     online = models.BooleanField(default=False)
     user_followers = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="follow_users",
-        blank=True
+        settings.AUTH_USER_MODEL, related_name="follow_users", blank=True
     )
     user_following = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="following_users",
-        blank=True
+        settings.AUTH_USER_MODEL, related_name="following_users", blank=True
     )
 
     USERNAME_FIELD = "email"
