@@ -64,6 +64,9 @@ class User(AbstractUser):
         settings.AUTH_USER_MODEL, related_name="following_users", blank=True
     )
 
+
+
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 

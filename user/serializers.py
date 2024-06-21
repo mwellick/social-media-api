@@ -52,10 +52,10 @@ class UserListSerializer(serializers.ModelSerializer):
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
     followers = serializers.IntegerField(
-        source="user_followers.count", read_only=True
+        source="following.count", read_only=True
     )
     users_followed = serializers.IntegerField(
-        source="user_following.count", read_only=True
+        source="followers.count", read_only=True
     )
 
     class Meta:

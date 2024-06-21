@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status, generics, mixins
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -33,7 +34,7 @@ class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
 
     def get_serializer_class(self):
-        if self.action == "like_post":
+        if self.action in ("like_post", "unlike_post"):
             return CreateLikeSerializer
         if self.action == "add_comment":
             return CreateCommentSerializer
@@ -93,11 +94,22 @@ class PostViewSet(ModelViewSet):
         serializer = CreateLikeSerializer(
             data=request.data,
             context={"request": request, "post_id": pk},
-
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(post=post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="unlike-post",
+        permission_classes=[IsAdminAllORIsAuthenticatedOrReadOnly],
+    )
+    def unlike_post(self, request, pk):
+        post = get_object_or_404(Post, pk=pk)
+        like = Like.objects.get(user=request.user, post=post)
+        like.delete()
+        return Response({"detail": "Post unliked."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentViewSet(ModelViewSet):
@@ -173,19 +185,36 @@ class FollowViewSet(ModelViewSet):
         return queryset
 
 
-class FollowUserView(
-    generics.GenericAPIView,
-    mixins.CreateModelMixin
-):
+class FollowUserView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
 
     def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
+        username = kwargs.get("username")
+        followed_user = get_object_or_404(get_user_model(), username=username)
+        follower = request.user
+        follow_data = {"follower": follower.id, "followed_user": followed_user.id}
+        serializer = self.get_serializer(data=follow_data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"detail": "Followed successfully"}, status=status.HTTP_201_CREATED
+        )
 
 
-class UnfollowUserView(generics.GenericAPIView):
+class UnfollowUserView(generics.GenericAPIView, mixins.CreateModelMixin):
+    queryset = Follow.objects.all()
     serializer_class = FollowSerializer
-
     def post(self, request, *args, **kwargs):
-        ...
+        username = kwargs.get("username")
+        followed_user = get_object_or_404(get_user_model(), username=username)
+        follower = request.user
+        follow_instance = Follow.objects.filter(
+            follower=follower, followed_user=followed_user
+        ).first()
+        if follow_instance:
+            follow_instance.delete()
+
+        return Response(
+            {"detail": "Unfollowed successfully"}, status=status.HTTP_204_NO_CONTENT
+        )
