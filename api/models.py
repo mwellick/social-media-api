@@ -37,7 +37,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.comment_author} left a comment on a " f"{self.post.author} post"
+        return f"{self.comment_author} left a comment on a {self.post.author} post"
 
 
 class Like(models.Model):
