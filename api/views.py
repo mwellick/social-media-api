@@ -2,15 +2,10 @@ from django.contrib.auth import get_user_model
 from rest_framework import status, generics, mixins
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
-from user.models import User
 from .models import Post, Comment, Like, Follow
-from .permissions import IsAdminAllORIsAuthenticatedOrReadOnly
 
 from .serializers import (
     PostSerializer,
@@ -71,7 +66,6 @@ class PostViewSet(ModelViewSet):
         detail=True,
         methods=["post"],
         url_path="add-comment",
-        permission_classes=[IsAdminAllORIsAuthenticatedOrReadOnly],
     )
     def add_comment(self, request, pk=None):
         post = self.get_object()
@@ -83,12 +77,7 @@ class PostViewSet(ModelViewSet):
         serializer.save(post=post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="like-post",
-        permission_classes=[IsAdminAllORIsAuthenticatedOrReadOnly],
-    )
+    @action(detail=True, methods=["post"], url_path="like-post")
     def like_post(self, request, pk=None):
         post = get_object_or_404(Post, pk=pk)
         serializer = CreateLikeSerializer(
@@ -99,12 +88,7 @@ class PostViewSet(ModelViewSet):
         serializer.save(post=post)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="unlike-post",
-        permission_classes=[IsAdminAllORIsAuthenticatedOrReadOnly],
-    )
+    @action(detail=True, methods=["post"], url_path="unlike-post")
     def unlike_post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
         like = Like.objects.get(user=request.user, post=post)
@@ -205,6 +189,7 @@ class FollowUserView(generics.GenericAPIView, mixins.CreateModelMixin):
 class UnfollowUserView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
+
     def post(self, request, *args, **kwargs):
         username = kwargs.get("username")
         followed_user = get_object_or_404(get_user_model(), username=username)

@@ -47,6 +47,7 @@ class PostRetrieveSerializer(PostListSerializer):
         fields = [
             "title",
             "author",
+            "comments",
             "likes",
             "published_date"
         ]
@@ -126,8 +127,11 @@ class CreateLikeSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         Like.unique_like(
-            attrs["user"].username, attrs["post"].content, serializers.ValidationError
+            attrs["user"].username,
+            attrs["post"].content,
+            serializers.ValidationError
         )
+
         return attrs
 
 
