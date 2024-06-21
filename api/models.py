@@ -37,7 +37,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.comment_author} left a comment on a {self.post.author} post"
+        return f"{self.comment_author} left a comment on a  {self.post.author} post"
 
 
 class Like(models.Model):
@@ -45,7 +45,6 @@ class Like(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes"
     )
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
-    is_liked = models.BooleanField(default=False)
 
     @staticmethod
     def unique_like(user: str, post: str, error_to_raise):
@@ -54,7 +53,7 @@ class Like(models.Model):
         return {"user": user, "post": post}
 
     def clean(self):
-        Like.unique_like(self.user.username, self.post.content, ValueError)
+        Like.unique_like(self.user, self.post, ValueError)
 
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
@@ -74,7 +73,6 @@ class Follow(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="followers"
     )
     followed_at = models.DateTimeField(auto_now_add=True)
-    is_followed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.follower.username} followed {self.following.username}"
