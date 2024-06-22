@@ -213,4 +213,4 @@ class FollowListSerializer(serializers.ModelSerializer):
 class FollowRetrieveSerializer(FollowListSerializer):
     class Meta:
         model = Follow
-        exclude = ["id", "is_followed"]
+        exclude = ["id"]

@@ -20,6 +20,7 @@ from .serializers import (
     LikeRetrieveSerializer,
     FollowSerializer,
     FollowListSerializer,
+    FollowRetrieveSerializer,
     CreateLikeSerializer,
 )
 
@@ -154,7 +155,7 @@ class FollowViewSet(ModelViewSet):
     def get_serializer_class(self):
         if self.action == "list":
             return FollowListSerializer
-        return FollowSerializer
+        return FollowRetrieveSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -190,7 +191,7 @@ class UnfollowUserView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
 
-    def post(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
         username = kwargs.get("username")
         followed_user = get_object_or_404(get_user_model(), username=username)
         follower = request.user
