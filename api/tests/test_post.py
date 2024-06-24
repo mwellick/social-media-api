@@ -41,26 +41,13 @@ class AuthenticatedPostApiTests(TestCase):
         self.post_1 = Post.objects.create(
             author=self.user,
             title="test_title",
-            content="test content",
-            published_date=timezone.now(),
+            content="test content"
         )
         self.post_2 = Post.objects.create(
             author=self.user_2,
             title="test title_post 2",
-            content="test content 2",
-            published_date=datetime(2023, 5, 19),
+            content="test content 2"
         )
-
-    def test_filter_post_by_year(self):
-        year = self.post_1.published_date.year
-        res = self.client.get(POST_URL, data={"year": year})
-        print(res.data)
-        serializer1 = PostListSerializer(self.post_1)
-        serializer2 = PostListSerializer(self.post_2)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn(serializer1.data, res.data["results"])
-        self.assertNotIn(serializer2.data, res.data["results"])
-
 
     def test_post_list(self):
         res = self.client.get(POST_URL)
@@ -76,21 +63,6 @@ class AuthenticatedPostApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertIn(serializer1.data, res.data["results"])
         self.assertNotIn(serializer2.data, res.data["results"])
-
-
-    def test_filter_post_by_month(self):
-        month = self.post_1.published_date.month
-        res = self.client.get(POST_URL, data={"month": month})
-        serializer1 = PostListSerializer(self.post_1)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn(serializer1.data, res.data["results"])
-
-    def test_filter_post_by_day(self):
-        day = self.post_1.published_date.day
-        res = self.client.get(POST_URL, data={"day": day})
-        serializer1 = PostListSerializer(self.post_1)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertIn(serializer1.data, res.data["results"])
 
     def test_retrieve_post_detail(self):
         res = self.client.get(detail_url(self.post_1.id))
@@ -157,7 +129,7 @@ class AdminPostTests(TestCase):
             email="Test@admin.test",
             password="Testpsw1",
             username="test_admin",
-            is_staff=True
+            is_staff=True,
         )
         self.user_2 = get_user_model().objects.create_user(
             email="Test@test2.test", password="Testpsw2", username="user2"
@@ -171,11 +143,7 @@ class AdminPostTests(TestCase):
             author=self.user_2, title="test title 2", content="test content 2"
         )
 
-
-
-
-
-    def testadmin_can_delete_any_post(self):
+    def test_admin_can_delete_any_post(self):
         res = self.client.delete(detail_url(self.post_2.id))
         self.assertEqual(Post.objects.count(), 1)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)

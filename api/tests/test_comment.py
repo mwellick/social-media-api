@@ -28,14 +28,10 @@ class AuthenticatedCommentApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="Test@test.test",
-            password="Testpsw1",
-            username="test_user"
+            email="Test@test.test", password="Testpsw1", username="test_user"
         )
         self.user_2 = get_user_model().objects.create_user(
-            email="Test@test2.test",
-            password="Testpsw2",
-            username="user2"
+            email="Test@test2.test", password="Testpsw2", username="user2"
         )
         self.client.force_authenticate(self.user)
 
@@ -45,15 +41,10 @@ class AuthenticatedCommentApiTests(TestCase):
             content="test content",
         )
         self.comment_1 = Comment.objects.create(
-            comment_author=self.user,
-            post=self.post_1,
-            body="test comment"
-
+            comment_author=self.user, post=self.post_1, body="test comment"
         )
         self.comment_2 = Comment.objects.create(
-            comment_author=self.user_2,
-            post=self.post_1,
-            body="test comment"
+            comment_author=self.user_2, post=self.post_1, body="test comment"
         )
 
     def test_comment_list(self):
@@ -108,12 +99,10 @@ class AdminCommentApiTests(TestCase):
             email="Test@admin.test",
             password="Testpsw1",
             username="test_admin",
-            is_staff=True
+            is_staff=True,
         )
         self.user_2 = get_user_model().objects.create_user(
-            email="Test@test2.test",
-            password="Testpsw2",
-            username="user2"
+            email="Test@test2.test", password="Testpsw2", username="user2"
         )
         self.client.force_authenticate(self.user)
 
@@ -123,16 +112,12 @@ class AdminCommentApiTests(TestCase):
             content="test content",
         )
         self.comment_1 = Comment.objects.create(
-            comment_author=self.user,
-            post=self.post_1,
-            body="test comment"
-
+            comment_author=self.user, post=self.post_1, body="test comment"
         )
         self.comment_2 = Comment.objects.create(
-            comment_author=self.user_2,
-            post=self.post_1,
-            body="test comment"
+            comment_author=self.user_2, post=self.post_1, body="test comment"
         )
+
     def test_admin_can_update_any_comment(self):
         payload = {
             "body": "updated comment",

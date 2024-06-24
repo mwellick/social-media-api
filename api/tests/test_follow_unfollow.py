@@ -28,23 +28,17 @@ class AuthenticatedFollowApiTests(TestCase):
     def setUp(self) -> None:
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="Test@test.test",
-            password="Testpsw1",
-            username="test_user"
+            email="Test@test.test", password="Testpsw1", username="test_user"
         )
         self.user_2 = get_user_model().objects.create_user(
-            email="Test@test2.test",
-            password="Testpsw2",
-            username="user2"
+            email="Test@test2.test", password="Testpsw2", username="user2"
         )
         self.client.force_authenticate(self.user)
         self.follow = Follow.objects.create(
-            follower=self.user,
-            followed_user=self.user_2
+            follower=self.user, followed_user=self.user_2
         )
         self.follow_2 = Follow.objects.create(
-            follower=self.user_2,
-            followed_user=self.user
+            follower=self.user_2, followed_user=self.user
         )
 
     def test_follow_list(self):
@@ -83,9 +77,7 @@ class AuthenticatedFollowApiTests(TestCase):
 
     def test_follow_user(self):
         self.user_3 = get_user_model().objects.create_user(
-            email="Test@test.test3",
-            password="Testpsw3",
-            username="test_user3"
+            email="Test@test.test3", password="Testpsw3", username="test_user3"
         )
         self.client.force_authenticate(self.user_3)
         url = f"/api/user/{self.user_2.username}/follow/"
@@ -97,3 +89,27 @@ class AuthenticatedFollowApiTests(TestCase):
         url = f"/api/user/{self.user.username}/unfollow/"
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class ManageUserProfile(TestCase):
+    def setUp(self) -> None:
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="Test@test.test", password="Testpsw1", username="test_user"
+        )
+        self.user_2 = get_user_model().objects.create_user(
+            email="Test@test2.test", password="Testpsw2", username="user2"
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_logout_user(self):
+        url = "/api/user/me/logout"
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(self.user.online)
+
+    def test_delete_user_account(self):
+        url = "/api/user/me/"
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(get_user_model().objects.count(), 1)
