@@ -69,16 +69,19 @@ class PostViewSet(ModelViewSet):
         queryset = self.queryset
         username = self.request.query_params.get("username")
         title = self.request.query_params.get("title")
+        hashtags = self.request.query_params.get("hashtags")
         year = self.request.query_params.get("year")
         month = self.request.query_params.get("month")
         day = self.request.query_params.get("day")
+
         if username:
             queryset = queryset.filter(author__username__icontains=username)
         if title:
             queryset = queryset.filter(title__icontains=title)
+        if hashtags:
+            queryset = queryset.filter(hashtags__icontains=hashtags)
         if year:
             queryset = queryset.filter(published_date__year=year)
-
         if month:
             queryset = queryset.filter(published_date__month=month)
 
@@ -307,13 +310,9 @@ class FollowViewSet(ModelViewSet):
         follower = self.request.query_params.get("follower")
         followed_user = self.request.query_params.get("followed")
         if follower:
-            queryset = queryset.filter(
-                follower__username__icontains=follower
-            )
+            queryset = queryset.filter(follower__username__icontains=follower)
         if followed_user:
-            queryset = queryset.filter(
-                followed_user__username__icontains=followed_user
-            )
+            queryset = queryset.filter(followed_user__username__icontains=followed_user)
         if self.action in ("list", "retrieve"):
             return queryset.select_related("follower", "followed_user")
         return queryset
@@ -334,7 +333,7 @@ class FollowViewSet(ModelViewSet):
                 description="Filter by followed user username",
                 type=str,
                 examples=[OpenApiExample("Example")],
-            )
+            ),
         ],
     )
     def list(self, request, *args, **kwargs):

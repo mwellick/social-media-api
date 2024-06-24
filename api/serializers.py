@@ -5,7 +5,15 @@ from .models import Post, Comment, Like, Follow
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ["id", "author", "title", "content", "published_date", "post_media"]
+        fields = [
+            "id",
+            "author",
+            "title",
+            "content",
+            "published_date",
+            "hashtags",
+            "post_media",
+        ]
 
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -15,13 +23,21 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "title", "author", "comments", "likes", "published_date"]
+        fields = [
+            "id",
+            "title",
+            "author",
+            "comments",
+            "likes",
+            "published_date",
+            "hashtags",
+        ]
 
 
 class PostRetrieveSerializer(PostListSerializer):
     class Meta:
         model = Post
-        fields = ["title", "author", "comments", "likes", "published_date"]
+        fields = ["title", "author", "comments", "likes", "published_date", "hashtags"]
 
 
 class CreateCommentSerializer(serializers.ModelSerializer):

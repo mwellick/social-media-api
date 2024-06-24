@@ -41,12 +41,14 @@ class AuthenticatedPostApiTests(TestCase):
         self.post_1 = Post.objects.create(
             author=self.user,
             title="test_title",
-            content="test content"
+            content="test content",
+            hashtags="weather,nature",
         )
         self.post_2 = Post.objects.create(
             author=self.user_2,
             title="test title_post 2",
-            content="test content 2"
+            content="test content 2",
+            hashtags="sport",
         )
 
     def test_post_list(self):
@@ -58,6 +60,14 @@ class AuthenticatedPostApiTests(TestCase):
 
     def test_filter_post_by_username(self):
         res = self.client.get(POST_URL, data={"username": "test_us"})
+        serializer1 = PostListSerializer(self.post_1)
+        serializer2 = PostListSerializer(self.post_2)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(serializer1.data, res.data["results"])
+        self.assertNotIn(serializer2.data, res.data["results"])
+
+    def test_filter_post_by_hashtags(self):
+        res = self.client.get(POST_URL, data={"hashtags": "weather"})
         serializer1 = PostListSerializer(self.post_1)
         serializer2 = PostListSerializer(self.post_2)
         self.assertEqual(res.status_code, status.HTTP_200_OK)

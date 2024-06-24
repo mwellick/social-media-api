@@ -7,16 +7,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = [
-            "id",
-            "email",
-            "password",
-            "username"
-        ]
-        read_only_fields = [
-            "id",
-            "is_staff"
-        ]
+        fields = ["id", "email", "password", "username"]
+        read_only_fields = ["id", "is_staff"]
         extra_kwargs = {
             "password": {
                 "write_only": True,
@@ -43,31 +35,25 @@ class UserSerializer(serializers.ModelSerializer):
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = [
-            "id",
-            "email",
-            "username"
-        ]
+        fields = ["id", "email", "username", "full_name"]
 
 
 class UserRetrieveSerializer(serializers.ModelSerializer):
-    followers = serializers.IntegerField(
-        source="following.count", read_only=True
-    )
-    users_followed = serializers.IntegerField(
-        source="followers.count", read_only=True
-    )
+    followers = serializers.IntegerField(source="following.count", read_only=True)
+    users_followed = serializers.IntegerField(source="followers.count", read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = [
             "email",
             "username",
+            "first_name",
+            "last_name",
             "online",
             "bio",
             "followers",
             "users_followed",
-            "profile_image"
+            "profile_image",
         ]
 
 
@@ -83,10 +69,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserLogoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = [
-            "email",
-            "password"
-        ]
+        fields = ["email", "password"]
         extra_kwargs = {
             "password": {
                 "write_only": True,

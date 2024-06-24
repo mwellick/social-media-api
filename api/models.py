@@ -22,6 +22,7 @@ class Post(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     published_date = models.DateTimeField(auto_now_add=True)
+    hashtags = models.CharField(max_length=255, null=True, blank=True)
     post_media = models.ImageField(blank=True, null=True, upload_to=post_image_path)
 
     def __str__(self):
