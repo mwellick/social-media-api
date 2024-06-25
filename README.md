@@ -3,8 +3,8 @@
 ## About project:
 
 
-This is the Social Media API platform for creating amd managing user accounts,posts,comments,likes/unlikes, follows/unfollows.
-It provides a comprehensive set of features for building a social media application, including user authentication, profile management, post creation and interaction, comment threads, and user following capabilities. The API is built using Django and Django REST framework, ensuring reliability, scalability, and security for your social media application."
+This is the Social Media API platform for creating and managing user accounts,posts,comments,likes/unlikes, follows/unfollows.
+It provides a comprehensive set of features for building a social media application, including user authentication, profile management, post creation and interaction, comment threads, and user following capabilities. The API is built using Django and Django REST framework, ensuring reliability, scalability, and security for social media application."
 
 ### Technologies that were included to this project:
 
@@ -17,8 +17,9 @@ It provides a comprehensive set of features for building a social media applicat
 ## The main features:
 
 * JWT authentication.
+* Logout.
 * Admin panel /admin/.
-* Allow users to create and manage their profiles,view another users profiles,see users online status,view the number of followers and following users, and update profile information and upload profile pictures.
+* Allow users to create/delete and manage their profiles,view another users profiles,see users online status,view the number of followers and following users, and update profile information and upload profile pictures.
 * Post Creation and Management: Enable users to create, edit, and delete posts. Posts can include text, images, hashtags,total likes.
 * Commenting on posts.
 * Liking/unliking posts.
@@ -48,6 +49,17 @@ pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
+
+## Test admin user:
+
+**email:** `admin@admin.com`  
+**password:** `Ellipsis`
+
+
+### Test default user:
+
+**email**: `user1@user.com`  
+**password**: `Qwerty`
 
 ## Demo
 
