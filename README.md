@@ -61,7 +61,7 @@ python manage.py runserver
 **email**: `user1@user.com`  
 **password**: `Qwerty`
 
-## Demo
+## DB Structure
 
 ![ER Diagram](socia_media_diagram.png)
 ![API Endpoints part 1](social_media_endpoints_1.png)
